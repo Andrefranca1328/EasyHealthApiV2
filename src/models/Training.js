@@ -12,6 +12,6 @@ const Training = db.sequelize.define('trainings', {
     underscored: true
 });
 
-db.sequelize.sync()
+
 
 module.exports = Training;

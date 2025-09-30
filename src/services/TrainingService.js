@@ -24,7 +24,4 @@ const TrainingService = {
     }
 
 };
-
-sequelize.sync({ force: true });
-
 module.exports = TrainingService;

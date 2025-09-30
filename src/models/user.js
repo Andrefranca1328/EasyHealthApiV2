@@ -13,6 +13,4 @@ const User = db.sequelize.define('users', {
     role: { type: db.Sequelize.ENUM('user', 'nutritionist', 'trainer'), allowNull: false, defaultValue: 'user' }
 });
 
-db.sequelize.sync({ alter: true });
-
 module.exports = User;
