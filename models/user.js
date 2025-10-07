@@ -9,7 +9,9 @@ const User = db.sequelize.define('users', {
     cpf: { type: db.Sequelize.STRING, allowNull: false, unique: true },
     phone: { type: db.Sequelize.STRING, allowNull: false },
     birthdate: { type: db.Sequelize.DATEONLY, allowNull: false },
-    address: { type: db.Sequelize.STRING, allowNull: false }
+    address: { type: db.Sequelize.STRING, allowNull: false },
+    status: {type: db.Sequelize.INTEGER, unique:false }
+
 });
 
 module.exports = User;
