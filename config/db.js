@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('easyhealthdb', 'root', 'Ll@41616790@', {
+const sequelize = new Sequelize('easyhealthdb', 'root', 'root', {
     host: 'localhost',
     port: 3306,
     dialect: 'mysql'
