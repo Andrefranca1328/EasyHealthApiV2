@@ -27,7 +27,6 @@ const AuthService = {
     },
 
     login: async (email, password) => {
-        // Busca o usuário pelo email
         const user = await User.findOne({ where: { email } });
         if (!user) {
             throw new Error('Email ou senha inválidos.');

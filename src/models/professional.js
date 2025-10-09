@@ -1,49 +1,60 @@
 const db = require('../config/db');
-const Sequelize = db.Sequelize;
 
 const Professional = db.sequelize.define('professional', {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true    
+    id: {
+        type: db.Sequelize.INTEGER,
+        autoIncrement: true,
+        allowNull: false,
+        primaryKey: true    
     },
     userId: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-      field: 'user_id',
-      references: {
-        model: 'users',
-        key: 'id'
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE' 
+        type: db.Sequelize.INTEGER,
+        allowNull: false,
+        field: 'user_id',
+        references: {
+            model: 'users',
+            key: 'id'
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE' 
     },
     professional_type: {
-        type: Sequelize.ENUM('nutritionist', 'personal_trainer'),
+        type: db.Sequelize.ENUM('nutritionist', 'personal_trainer'),
         allowNull: false
     },
     specialty: {
-        type: Sequelize.STRING,
+        type: db.Sequelize.STRING,
         allowNull: false
     }, 
     weighted_rating: {
-        type: Sequelize.FLOAT,
-        allowNull: false
+        type: db.Sequelize.FLOAT,
+        allowNull: false,
+        defaultValue: 0.0 
     },
     profile_views_7: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 0
-    },hire_count: {
-        type: Sequelize.INTEGER,
+        type: db.Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 0
     }
 }, {
-  tableName: 'professional',
-  underscored: true,
-  timestamps: true 
+    tableName: 'professional',
+    underscored: true,
+    timestamps: true 
 });
+
+// Definição das Associações para o modelo Professional
+Professional.associate = (models) => {
+    // Um Profissional pertence a um Usuário
+    Professional.belongsTo(models.User, { foreignKey: 'user_id' });
+    
+    // Um Profissional tem muitos Logs de Visualização
+    Professional.hasMany(models.ProfileViewLog, { foreignKey: 'professional_id', onDelete: 'CASCADE' });
+    
+    // FUTURO: Um Profissional pode ter muitas Avaliações (Reviews)
+    // Professional.hasMany(models.Review, { foreignKey: 'professional_id' });
+    
+    // FUTURO: Um Profissional pode ter muitas Consultas
+    // Professional.hasMany(models.Consulta, { foreignKey: 'professional_id' }); 
+};
 
 module.exports = Professional;
