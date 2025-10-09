@@ -1,24 +1,18 @@
-const { Sequelize } = require('sequelize');
+const Sequelize = require('sequelize');
 require('dotenv').config();
 
-// Variáveis de ambiente (.env)
-const DB_NAME = process.env.DB_NAME || 'easyhealth_db'; // nome do banco
-const DB_USER = process.env.DB_USER || 'root';          // usuário MySQL
-const DB_PASS = process.env.DB_PASSWORD || 'root';    // senha do MySQL
-const DB_HOST = process.env.DB_HOST || 'localhost';
-const DB_PORT = process.env.DB_PORT || 3306;
+const DB_NAME = process.env.DB_NAME;
+const DB_USER = process.env.DB_USER;
+const DB_PASS = process.env.DB_PASSWORD;
+const DB_HOST = process.env.DB_HOST;
+const DB_PORT = process.env.DB_PORT;
 
-// Criação da conexão Sequelize
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   host: DB_HOST,
   port: DB_PORT,
   dialect: 'mysql',
-  logging: console.log, // mostra as queries no console
-  define: {
-    underscored: true,  // usa snake_case nas colunas
-    timestamps: true    // cria created_at e updated_at
-  }
+  logging: console.log, // <- habilita todas as queries para debug
+  define: { underscored: true, timestamps: true }
 });
 
-// Exporta conexão e classe principal
-module.exports = { sequelize, Sequelize };
+module.exports = { Sequelize, sequelize };
