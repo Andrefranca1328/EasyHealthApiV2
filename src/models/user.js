@@ -36,7 +36,7 @@ const User = db.sequelize.define('users', {
         allowNull: false 
     },
     role: { 
-        type: db.Sequelize.ENUM('user', 'nutritionist', 'trainer'), 
+        type: db.Sequelize.ENUM('user', 'trainer'), 
         allowNull: false, 
         defaultValue: 'user' 
     }
@@ -48,11 +48,7 @@ const User = db.sequelize.define('users', {
 
 User.associate = (models) => {
 
-    User.hasMany(models.Consulta, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-
     User.hasMany(models.Training, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-
-    User.hasOne(models.Professional, { foreignKey: 'user_id', onDelete: 'CASCADE' });
 };
 
 module.exports = User;

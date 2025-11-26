@@ -22,12 +22,10 @@ const ProfessionalController = {  
     },
     getProfessionalById: async (req, res) => {
         try {
-            const { id } = req.params; // Captura o ID
-            // Chama o Service que busca o perfil E loga a visualização
+            const { id } = req.params; 
             const professional = await ProfessionalService.getProfessionalById(id);
 
             if (!professional) {
-                // Retorna 404 se o Service retornar null
                 return res.status(404).json({ error: "Professional not found" }); 
             }
 
