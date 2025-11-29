@@ -1,55 +1,30 @@
-// src/models/Rating.js
+// src/models/Rating.js (NOVO: Mongoose Schema)
 
-const db = require('../config/db');
+const mongoose = require('mongoose');
 
-const Rating = db.sequelize.define('ratings', {
-    id: {
-        type: db.Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
+const RatingSchema = new mongoose.Schema({
     rating: {
-        type: db.Sequelize.FLOAT, 
-        allowNull: false,
-        validate: {
-            min: 1,
-            max: 5
-        }
+        type: Number,
+        required: true,
+        min: 1,
+        max: 5
     },
-    comment: {
-        type: db.Sequelize.STRING,
-        allowNull: true
-    },
+    comment: { type: String, trim: true },
     userId: { 
-        type: db.Sequelize.INTEGER, 
-        allowNull: false,
-        field: 'user_id', 
-        references: {
-            model: 'users',
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
-    }, 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
     professionalId: {
-        type: db.Sequelize.INTEGER,
-        allowNull: false,
-        field: 'professional_id',
-        references: {
-            model: 'professional',
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Professional',
+        required: true
     }
-
 }, {
-    tableName: 'ratings',
-    underscored: true,
     timestamps: true
 });
 
-Rating.associate = (models) => {
-    Rating.belongsTo(models.User, { foreignKey: 'user_id' });
-    Rating.belongsTo(models.Professional, { foreignKey: 'professional_id' });
-};
-    
-module.exports = Rating;
+// Garante que um usuário só pode avaliar um profissional uma vez (opcional)
+RatingSchema.index({ userId: 1, professionalId: 1 }, { unique: true });
+
+module.exports = mongoose.model('Rating', RatingSchema);

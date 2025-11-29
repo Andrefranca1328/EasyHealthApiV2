@@ -1,53 +1,23 @@
-const db = require('../config/db');
+// src/models/Training.js (NOVO: Mongoose Schema)
 
-const Training = db.sequelize.define('trainings', {
-    id: {
-        type: db.Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    description: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false 
-    },
-    duration: { 
-        type: db.Sequelize.INTEGER, 
-        allowNull: false 
-    }, 
-    date: { 
-        type: db.Sequelize.DATEONLY, 
-        allowNull: false 
-    },
-    userId: { 
-        type: db.Sequelize.INTEGER, 
-        allowNull: false,
-        field: 'user_id', 
-        references: {
-            model: 'users',
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
-    }, 
-    professionalId: {
-        type: db.Sequelize.INTEGER,
-        allowNull: false,
-        field: 'professional_id',
-        references: {
-            model: 'professional', 
-            key: 'id'
-        },
-        onDelete: 'CASCADE'
-    }
+const mongoose = require('mongoose');
 
+const TrainingSchema = new mongoose.Schema({
+    description: { type: String, required: true },
+    duration: { type: Number, required: true },
+    date: { type: Date, required: true },
+    userId: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User', 
+        required: true 
+    },
+    professionalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Professional',
+        required: true
+    }
 }, {
-    tableName: 'trainings',
-    underscored: true
+    timestamps: true
 });
 
-Training.associate = (models) => {
-    Training.belongsTo(models.User, { foreignKey: 'user_id' });
-
-    Training.belongsTo(models.Professional, { foreignKey: 'professional_id' }); 
-};
-    
-module.exports = Training;
+module.exports = mongoose.model('Training', TrainingSchema);

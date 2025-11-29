@@ -1,36 +1,19 @@
-const db = require('../config/db');
+// src/models/ProfileViewLog.js (NOVO: Mongoose Schema)
 
-const ProfileViewLog = db.sequelize.define('profile_views_log', {
-    id: {
-        type: db.Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    professional_id: {
-        type: db.Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'professional', 
-            key: 'id'
-        },
-        onDelete: 'CASCADE',   
-        onUpdate: 'CASCADE'
+const mongoose = require('mongoose');
+
+const ProfileViewLogSchema = new mongoose.Schema({
+    professionalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Professional',
+        required: true
     },
     viewed_at: {
-        type: db.Sequelize.DATE, 
-        allowNull: false,
-        defaultValue: db.Sequelize.NOW 
+        type: Date,
+        default: Date.now
     }
 }, {
-    tableName: 'profile_views_log', 
-    underscored: true,
-    timestamps: false 
+    timestamps: false // Manter como false, pois a data já está no campo viewed_at
 });
 
-
-ProfileViewLog.associate = (models) => {
-
-    ProfileViewLog.belongsTo(models.Professional, { foreignKey: 'professional_id' });
-};
-
-module.exports = ProfileViewLog;
+module.exports = mongoose.model('ProfileViewLog', ProfileViewLogSchema);

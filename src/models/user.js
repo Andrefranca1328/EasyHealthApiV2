@@ -1,54 +1,18 @@
-const db = require('../config/db');
+// src/models/user.js (NOVO: Mongoose Schema)
 
-const User = db.sequelize.define('users', {
-    id: { 
-        type: db.Sequelize.INTEGER, 
-        primaryKey: true, 
-        autoIncrement: true 
-    },
-    name: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false 
-    },
-    email: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false, unique: true 
-    },
-    password: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false 
-    },
-    cpf: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false, 
-        unique: true 
-    },
-    phone: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false 
-    },
-    birthdate: { 
-        type: db.Sequelize.DATEONLY, 
-        allowNull: false 
-    },
-    address: { 
-        type: db.Sequelize.STRING, 
-        allowNull: false 
-    },
-    role: { 
-        type: db.Sequelize.ENUM('user', 'trainer'), 
-        allowNull: false, 
-        defaultValue: 'user' 
-    }
+const mongoose = require('mongoose');
+
+const UserSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    cpf: { type: String, required: true, unique: true },
+    phone: { type: String, required: true },
+    birthdate: { type: Date, required: true },
+    address: { type: String, required: true },
+    role: { type: String, enum: ['user', 'trainer'], required: true, default: 'user' }
 }, {
-    tableName: 'users',
-    underscored: true,
     timestamps: true
 });
 
-User.associate = (models) => {
-
-    User.hasMany(models.Training, { foreignKey: 'user_id', onDelete: 'CASCADE' });
-};
-
-module.exports = User;
+module.exports = mongoose.model('User', UserSchema);

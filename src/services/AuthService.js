@@ -1,14 +1,15 @@
+// src/services/AuthService.js (NOVO: Lógica Mongoose)
+
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { Op } = require('sequelize');
 require('dotenv').config();
 
 const AuthService = {
     register: async (userData) => {
 
-        const existingUser = await User.findOne({
-            where: { [Op.or]: [{ email: userData.email }, { cpf: userData.cpf }] }
+        const existingUser = await User.findOne({ 
+            $or: [{ email: userData.email }, { cpf: userData.cpf }] 
         });
 
         if (existingUser) {
@@ -17,17 +18,20 @@ const AuthService = {
 
         const hashedPassword = await bcrypt.hash(userData.password, 10);
         
-
+        // Cria o usuário usando o Mongoose
         const newUser = await User.create({
             ...userData,
             password: hashedPassword
         });
 
-        return newUser;
+        // O Mongoose não tem toJSON() com exclusão de campos por padrão, excluímos manualmente.
+        const { password, ...userWithoutPassword } = newUser._doc;
+        return userWithoutPassword;
     },
 
     login: async (email, password) => {
-        const user = await User.findOne({ where: { email } });
+        // Encontra o usuário pelo email
+        const user = await User.findOne({ email }); 
         if (!user) {
             throw new Error('Email ou senha inválidos.');
         }
@@ -36,13 +40,15 @@ const AuthService = {
         if (!isPasswordValid) {
             throw new Error('Email ou senha inválidos.');
         }
-        console.log('Valor da Chave Secreta:', process.env.JWT_SECRET);
 
-        const token = jwt.sign({ id: user.id, email: user.email },
-             process.env.JWT_SECRET,
-             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role }, // Usamos _id no Mongoose
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
         );
-        const { password: _, ...userWithoutPassword } = user.toJSON();
+        
+        // Excluímos a senha do objeto retornado
+        const { password: _, ...userWithoutPassword } = user._doc;
         return { user: userWithoutPassword, token };
     },
 };
