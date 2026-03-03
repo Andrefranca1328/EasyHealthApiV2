@@ -5,16 +5,16 @@ console.log('🧪 Conteúdo do JWT_SECRET:', process.env.JWT_SECRET);
 
 const express = require('express');
 const cors = require('cors');
-const { connectDB } = require('./config/db'); // Importa a função de conexão
+const { connectDB } = require('./config/db'); 
 
-// Os modelos ainda precisam ser importados para que o Mongoose os reconheça.
-require('./models/user');
+
+require('./models/User');
 require('./models/Training');
-require('./models/professional');
+require('./models/Professional');
 require('./models/ProfileViewLog');
 require('./models/Rating');
 
-// rotas (não mudam)
+
 const authRoutes = require('./routes/AuthRoutes');
 const userRoutes = require('./routes/UserRoutes');
 const trainingRoutes = require('./routes/TrainingRoutes');
@@ -29,7 +29,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// endpoints (não mudam)
+// endpoints 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/trainings', trainingRoutes);

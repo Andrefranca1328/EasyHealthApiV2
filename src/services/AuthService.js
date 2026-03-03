@@ -1,6 +1,6 @@
 // src/services/AuthService.js (NOVO: Lógica Mongoose)
 
-const User = require('../models/user');
+const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -8,8 +8,8 @@ require('dotenv').config();
 const AuthService = {
     register: async (userData) => {
 
-        const existingUser = await User.findOne({ 
-            $or: [{ email: userData.email }, { cpf: userData.cpf }] 
+        const existingUser = await User.findOne({
+            $or: [{ email: userData.email }, { cpf: userData.cpf }]
         });
 
         if (existingUser) {
@@ -17,7 +17,7 @@ const AuthService = {
         }
 
         const hashedPassword = await bcrypt.hash(userData.password, 10);
-        
+
         // Cria o usuário usando o Mongoose
         const newUser = await User.create({
             ...userData,
@@ -31,7 +31,7 @@ const AuthService = {
 
     login: async (email, password) => {
         // Encontra o usuário pelo email
-        const user = await User.findOne({ email }); 
+        const user = await User.findOne({ email });
         if (!user) {
             throw new Error('Email ou senha inválidos.');
         }
@@ -46,7 +46,7 @@ const AuthService = {
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
         );
-        
+
         // Excluímos a senha do objeto retornado
         const { password: _, ...userWithoutPassword } = user._doc;
         return { user: userWithoutPassword, token };

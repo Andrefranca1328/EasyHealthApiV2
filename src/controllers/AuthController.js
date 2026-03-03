@@ -4,8 +4,7 @@ const AuthController = {
     register: async (req, res) => {
         try {
             const user = await AuthService.register(req.body);
-            const { password, ...userWithoutPassword } = user.toJSON();
-            res.status(201).json({ message: "Usuário registrado com sucesso!", user: userWithoutPassword });
+            res.status(201).json({ message: "Usuário registrado com sucesso!", user });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }

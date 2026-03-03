@@ -3,9 +3,9 @@
 const mongoose = require('mongoose');
 
 const ProfessionalSchema = new mongoose.Schema({
-    userId: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
         unique: true
     },
@@ -13,6 +13,15 @@ const ProfessionalSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: 'Personal Trainer'
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected'],
+        default: 'pending'
+    },
+    document: {
+        type: String,
+        required: true
     },
     weighted_rating: {
         type: Number,

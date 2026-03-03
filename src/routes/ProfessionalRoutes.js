@@ -1,17 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const professionalController = require('../controllers/professionalController');
+const ProfessionalController = require('../controllers/ProfessionalController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 
-router.get('/top-rated', professionalController.getTopRatedProfessionals); 
-router.get('/type/:type', professionalController.getProfessionalsByType);
-router.get('/:id/profile-views', professionalController.getProfileViewsLast7Days); 
-router.post('/', professionalController.createProfessional);
-router.get('/:id', professionalController.getProfessionalById);
-router.put('/:id', professionalController.updateProfessional);
-router.delete('/:id', professionalController.deleteProfessional);
+router.get('/top-rated', ProfessionalController.getTopRatedProfessionals);
+router.get('/type/:type', ProfessionalController.getProfessionalsByType);
+router.get('/:id/profile-views', ProfessionalController.getProfileViewsLast7Days);
+router.post('/', ProfessionalController.createProfessional);
+router.get('/:id', ProfessionalController.getProfessionalById);
+router.put('/:id', ProfessionalController.updateProfessional);
+router.delete('/:id', ProfessionalController.deleteProfessional);
 
 
 module.exports = router;

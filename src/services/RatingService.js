@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const Rating = require('../models/Rating');
-const Professional = require('../models/professional');
+const Professional = require('../models/Professional');
 
 const RatingService = {
   calculateWeightedRating: async (professionalId) => {
