@@ -1,0 +1,75 @@
+name: CI – Backend (EasyHealth API)
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Instalar dependências, rodar testes unitários e de integração
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'easyhealth_dev_secret_2026' }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI || 'mongodb://localhost:27017/easyhealth' }}
+      PORT: 3000
+
+    steps:
+      # ── 1. Checkout do código ──────────────────────────────────────────────
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      # ── 2. Configurar Node.js ──────────────────────────────────────────────
+      - name: ⚙️ Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ── 3. Instalar dependências ───────────────────────────────────────────
+      - name: 📦 Instalar dependências (npm install)
+        run: npm install
+
+      # ── 4. Rodar testes unitários com Jest ────────────────────────────────
+      - name: 🧪 Rodar testes unitários – AuthService.login & register
+        run: npm test
+
+      # ── 5. Iniciar o servidor Express no background ─────────────────────
+      - name: 🚀 Iniciar servidor Express
+        run: |
+          npm start &
+          npx wait-on http://localhost:3000/ -t 20000
+
+      # ── 6. Rodar testes de integração com Newman (Postman) ───────────────
+      - name: 🧪 Rodar testes de integração (Newman)
+        run: npx newman run tests/newman/easyhealth.postman_collection.json --env-var baseUrl=http://localhost:3000
+
+      # ── 7. Upload do Relatório de Cobertura (Artifacts) ──────────────────
+      - name: 📤 Upload do relatório de cobertura de testes (Jest)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jest-coverage
+          path: coverage/
+          retention-days: 7
+
+      # ── 8. Resumo de cobertura (exibido no log do Actions) ────────────────
+      - name: 📊 Exibir resumo de cobertura
+        if: always()
+        run: |
+          echo "============================================"
+          echo "  Resultado dos testes: ${{ job.status }}"
+          echo "============================================"
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Todos os testes e integrações passaram com sucesso!"
+          else
+            echo "❌ Falha detectada – verifique os logs acima."
+          fi

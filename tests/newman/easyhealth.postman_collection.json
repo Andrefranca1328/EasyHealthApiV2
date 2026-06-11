@@ -1,0 +1,226 @@
+{
+  "info": {
+    "_postman_id": "easyhealth-ci-collection",
+    "name": "EasyHealth API – Testes de Integração (CI/CD)",
+    "description": "Coleção de testes de integração para o pipeline CI/CD do Easy Health.\nCobre os endpoints de autenticação: /api/auth/register e /api/auth/login.\n\nCategoria CI/CD: Integração (de → para)\nFerramenta: Newman (Postman CLI)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "testEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth – Cadastro e Login",
+      "item": [
+        {
+          "name": "1. POST /api/auth/register – Cadastro de usuário",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Gera um e-mail único para evitar conflito de dados entre execuções",
+                  "const suffix = Date.now().toString(36);",
+                  "const email = `ci_test_${suffix}@easyhealth.com`;",
+                  "pm.collectionVariables.set('testEmail', email);",
+                  "pm.collectionVariables.set('testCpf', `999${suffix.substring(0,8)}`);"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[Register] Status 201 – Usuário criado com sucesso', () => {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('[Register] Resposta contém campo message', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('message');",
+                  "});",
+                  "",
+                  "pm.test('[Register] Resposta contém objeto user', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('user');",
+                  "});",
+                  "",
+                  "pm.test('[Register] Objeto user NÃO expõe senha', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.user).to.not.have.property('password');",
+                  "});",
+                  "",
+                  "pm.test('[Register] Tempo de resposta < 2000ms', () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"CI Test User\",\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"senha@CI123\",\n    \"cpf\": \"{{testCpf}}\",\n    \"phone\": \"11999990001\",\n    \"birthdate\": \"1995-06-10\",\n    \"address\": \"Rua CI/CD, 100\",\n    \"role\": \"trainer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "2. POST /api/auth/login – Login com credenciais válidas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[Login] Status 200 – Login bem-sucedido', () => {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('[Login] Resposta contém token JWT', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('token');",
+                  "    pm.expect(json.token).to.be.a('string').and.not.empty;",
+                  "    // Salva o token para uso nos próximos requests",
+                  "    pm.collectionVariables.set('authToken', json.token);",
+                  "});",
+                  "",
+                  "pm.test('[Login] Resposta contém dados do usuário', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('user');",
+                  "    pm.expect(json.user).to.have.property('email');",
+                  "});",
+                  "",
+                  "pm.test('[Login] Usuário retornado NÃO expõe senha', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json.user).to.not.have.property('password');",
+                  "});",
+                  "",
+                  "pm.test('[Login] Tempo de resposta < 2000ms', () => {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"senha@CI123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "3. POST /api/auth/login – Login com senha errada (deve falhar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[Login-Falha] Status 401 – Credenciais inválidas rejeitadas', () => {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test('[Login-Falha] Resposta contém campo error', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('error');",
+                  "});",
+                  "",
+                  "pm.test('[Login-Falha] NÃO retorna token JWT', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.not.have.property('token');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\",\n    \"password\": \"senha_ERRADA_999\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "4. POST /api/auth/login – Campos obrigatórios ausentes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('[Login-Validação] Status 400 – Campos obrigatórios ausentes', () => {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test('[Login-Validação] Resposta contém campo error', () => {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(json).to.have.property('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"{{testEmail}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
