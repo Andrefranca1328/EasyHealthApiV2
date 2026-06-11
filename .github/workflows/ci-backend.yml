@@ -7,9 +7,43 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
-    name: Instalar dependências, rodar testes unitários e de integração
+
+  # ── JOB 1: Testes Unitários ───────────────────────────────────────────────
+  unit-tests:
+    name: 🧪 Testes Unitários (Jest)
     runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Instalar dependências
+        run: npm install
+
+      - name: 🧪 Rodar testes unitários com cobertura
+        run: npm test
+        env:
+          JWT_SECRET: easyhealth_dev_secret_2026
+
+      - name: 📤 Upload do relatório de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jest-coverage
+          path: coverage/
+          retention-days: 7
+
+  # ── JOB 2: Testes de Integração (endpoints) ──────────────────────────────
+  integration-tests:
+    name: 🔗 Testes de Integração – Endpoints (Newman)
+    runs-on: ubuntu-latest
+    needs: unit-tests  # só roda se os testes unitários passarem
 
     services:
       mongodb:
@@ -23,53 +57,46 @@ jobs:
       PORT: 3000
 
     steps:
-      # ── 1. Checkout do código ──────────────────────────────────────────────
       - name: 📥 Checkout do repositório
         uses: actions/checkout@v4
 
-      # ── 2. Configurar Node.js ──────────────────────────────────────────────
       - name: ⚙️ Configurar Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # ── 3. Instalar dependências ───────────────────────────────────────────
-      - name: 📦 Instalar dependências (npm install)
+      - name: 📦 Instalar dependências
         run: npm install
 
-      # ── 4. Rodar testes unitários com Jest ────────────────────────────────
-      - name: 🧪 Rodar testes unitários – AuthService.login & register
-        run: npm test
-
-      # ── 5. Iniciar o servidor Express no background ─────────────────────
       - name: 🚀 Iniciar servidor Express
         run: |
           npm start &
-          npx wait-on http://localhost:3000/ -t 20000
+          npx wait-on http://localhost:3000/ -t 60000
 
-      # ── 6. Rodar testes de integração com Newman (Postman) ───────────────
-      - name: 🧪 Rodar testes de integração (Newman)
-        run: npx newman run tests/newman/easyhealth.postman_collection.json --env-var baseUrl=http://localhost:3000
+      - name: 🔐 Testar endpoints de Auth (register + login)
+        run: |
+          npx newman run tests/newman/easyhealth.postman_collection.json \
+            --folder "Auth – Cadastro e Login" \
+            --env-var baseUrl=http://localhost:3000 \
+            --reporters cli \
+            --reporter-cli-no-banner
 
-      # ── 7. Upload do Relatório de Cobertura (Artifacts) ──────────────────
-      - name: 📤 Upload do relatório de cobertura de testes (Jest)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: jest-coverage
-          path: coverage/
-          retention-days: 7
+      - name: 🧪 Testar todos os outros endpoints
+        run: |
+          npx newman run tests/newman/easyhealth.postman_collection.json \
+            --env-var baseUrl=http://localhost:3000 \
+            --reporters cli \
+            --reporter-cli-no-banner
 
-      # ── 8. Resumo de cobertura (exibido no log do Actions) ────────────────
-      - name: 📊 Exibir resumo de cobertura
+      - name: 📊 Resumo final
         if: always()
         run: |
           echo "============================================"
-          echo "  Resultado dos testes: ${{ job.status }}"
+          echo "  Resultado: ${{ job.status }}"
           echo "============================================"
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Todos os testes e integrações passaram com sucesso!"
+            echo "✅ Todos os endpoints responderam corretamente!"
           else
             echo "❌ Falha detectada – verifique os logs acima."
           fi
