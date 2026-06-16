@@ -1,20 +1,25 @@
 {
   "name": "easyhealth-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "test": "jest --coverage --forceExit"
+    "test": "jest --coverage --forceExit",
+    "seed:admin": "node scripts/seedAdmin.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
-    "multer": "^2.1.0"
+    "multer": "^2.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",
@@ -26,7 +31,8 @@
       "**/tests/**/*.test.js"
     ],
     "collectCoverageFrom": [
-      "src/services/AuthService.js"
+      "src/services/**/*.js",
+      "src/middlewares/**/*.js"
     ]
   }
 }
