@@ -11,7 +11,7 @@ const ProfessionalSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Personal Trainer', 'Nutricionista'],
+        enum: ['Personal Trainer', 'Nutricionista', 'Fisioterapeuta', 'Endocrinologista', 'Dermatologista'],
         required: true,
         default: 'Personal Trainer'
     },

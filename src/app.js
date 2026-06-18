@@ -16,6 +16,7 @@ require('./models/Professional');
 require('./models/ProfileViewLog');
 require('./models/Rating');
 require('./models/Plan');
+require('./models/Consulta');
 
 // ── Rotas ───────────────────────────────────────────────────────────────────
 const authRoutes = require('./routes/AuthRoutes');
@@ -25,6 +26,7 @@ const professionalRoutes = require('./routes/ProfessionalRoutes');
 const ratingRoutes = require('./routes/RatingRoutes');
 const planRoutes = require('./routes/PlanRoutes');
 const adminRoutes = require('./routes/AdminRoutes');
+const consultaRoutes = require('./routes/ConsultaRoutes');
 
 // ── Swagger ─────────────────────────────────────────────────────────────────
 const { swaggerUi, swaggerSpec } = require('./config/swagger');
@@ -59,7 +61,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+app.options('*splat', cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -93,6 +95,7 @@ app.use('/api/professionals', professionalRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/plans', planRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/consultas', consultaRoutes);
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (req, res) =>

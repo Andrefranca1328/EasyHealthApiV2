@@ -5,8 +5,8 @@ const create = Joi.object({
     userId:               Joi.string().hex().length(24).required().messages({
         'any.required': 'userId é obrigatório.'
     }),
-    type:                 Joi.string().valid('Personal Trainer', 'Nutricionista').required().messages({
-        'any.only': 'Tipo deve ser "Personal Trainer" ou "Nutricionista".',
+    type:                 Joi.string().valid('Personal Trainer', 'Nutricionista', 'Fisioterapeuta', 'Endocrinologista', 'Dermatologista').required().messages({
+        'any.only': 'Tipo de profissional inválido.',
         'any.required': 'Tipo é obrigatório.'
     }),
     professionalRegister: Joi.string().max(30).optional(),
@@ -19,7 +19,7 @@ const create = Joi.object({
 });
 
 const update = Joi.object({
-    type:                 Joi.string().valid('Personal Trainer', 'Nutricionista').optional(),
+    type:                 Joi.string().valid('Personal Trainer', 'Nutricionista', 'Fisioterapeuta', 'Endocrinologista', 'Dermatologista').optional(),
     professionalRegister: Joi.string().max(30).optional(),
     bio:                  Joi.string().max(800).optional(),
     city:                 Joi.string().max(100).optional(),
