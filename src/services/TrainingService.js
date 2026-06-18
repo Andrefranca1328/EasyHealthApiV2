@@ -1,19 +1,35 @@
-const { sequelize } = require('../config/db');
+// src/services/TrainingService.js
+
 const Training = require('../models/Training');
 
 const TrainingService = {
-  createTraining: (trainingData) => Training.create(trainingData),
+    createTraining: (trainingData) => Training.create(trainingData),
 
-  getAllTrainings: () =>
-    Training.find().populate('userId').populate('professionalId').lean(),
+    /**
+     * Lista treinos com filtros opcionais por userId e/ou professionalId.
+     */
+    getAllTrainings({ userId, professionalId } = {}) {
+        const query = {};
+        if (userId)         query.userId         = userId;
+        if (professionalId) query.professionalId = professionalId;
 
-  getTrainingById: (id) =>
-    Training.findById(id).populate('userId').populate('professionalId').lean(),
+        return Training.find(query)
+            .populate('userId', 'name email')
+            .populate('professionalId', 'type city')
+            .sort({ date: -1 })
+            .lean();
+    },
 
-  updateTraining: (id, trainingData) =>
-    Training.findByIdAndUpdate(id, trainingData, { new: true }),
+    getTrainingById: (id) =>
+        Training.findById(id)
+            .populate('userId', 'name email')
+            .populate('professionalId', 'type city')
+            .lean(),
 
-  deleteTraining: (id) => Training.findByIdAndDelete(id)
+    updateTraining: (id, trainingData) =>
+        Training.findByIdAndUpdate(id, trainingData, { new: true }),
+
+    deleteTraining: (id) => Training.findByIdAndDelete(id)
 };
 
 module.exports = TrainingService;

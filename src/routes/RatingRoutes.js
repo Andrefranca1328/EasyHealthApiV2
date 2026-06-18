@@ -1,16 +1,15 @@
 // src/routes/RatingRoutes.js
 
-const express = require('express');
-const router = express.Router();
+const express          = require('express');
+const router           = express.Router();
 const RatingController = require('../controllers/RatingController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const authMiddleware   = require('../middlewares/authMiddleware');
+const validate         = require('../middlewares/validateMiddleware');
+const { create }       = require('../validators/ratingValidator');
 
 router.use(authMiddleware);
 
-// Rota para clientes criarem uma nova avaliação
-router.post('/', RatingController.createRating);
+router.post('/',                   validate(create), RatingController.createRating);
+router.get('/:professionalId',                       RatingController.getRatingsByProfessional);
 
-// Rota para visualizar as avaliações de um professional
-router.get('/:professionalId', RatingController.getRatingsByProfessional);
-
-module.exports = router;
+module.exports = router;

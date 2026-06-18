@@ -10,7 +10,10 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     birthdate: { type: Date, required: true },
     address: { type: String, required: true },
-    role: { type: String, enum: ['user', 'trainer'], required: true, default: 'user' }
+    role: { type: String, enum: ['user', 'trainer', 'nutritionist', 'admin'], required: true, default: 'user' },
+    city:         { type: String },
+    state:        { type: String },
+    profilePhoto: { type: String }
 }, {
     timestamps: true
 });

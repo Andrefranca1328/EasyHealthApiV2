@@ -1,16 +1,20 @@
 const http = require('http');
 
-const request = (method, path, data, token = null) => {
+const request = (method, path, data, token = null, isMultipart = false, boundary = null) => {
     return new Promise((resolve, reject) => {
         const options = {
             hostname: 'localhost',
             port: 3000,
             path: path,
             method: method,
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: {}
         };
+
+        if (isMultipart) {
+            options.headers['Content-Type'] = `multipart/form-data; boundary=${boundary}`;
+        } else {
+            options.headers['Content-Type'] = 'application/json';
+        }
 
         if (token) {
             options.headers['Authorization'] = `Bearer ${token}`;
@@ -31,7 +35,11 @@ const request = (method, path, data, token = null) => {
         req.on('error', reject);
 
         if (data) {
-            req.write(JSON.stringify(data));
+            if (isMultipart) {
+                req.write(data);
+            } else {
+                req.write(JSON.stringify(data));
+            }
         }
         req.end();
     });
@@ -48,7 +56,7 @@ async function runTests() {
         email: `nutri_${uniqueSuffix}@example.com`,
         password: "password123",
         cpf: `321${uniqueSuffix.substring(0, 8)}`,
-        phone: "888888888",
+        phone: "88988888888",
         birthdate: "1985-05-05",
         address: "Av Alimentação 456",
         role: "trainer"
@@ -83,10 +91,19 @@ async function runTests() {
 
         // 4. Create Professional
         console.log("[4] Testing POST /api/professionals...");
-        res = await request('POST', '/api/professionals', {
-            userId: userId,
-            type: "Nutricionista"
-        }, token);
+        const boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';
+        let payload = '';
+        payload += `--${boundary}\r\n`;
+        payload += `Content-Disposition: form-data; name="userId"\r\n\r\n${userId}\r\n`;
+        payload += `--${boundary}\r\n`;
+        payload += `Content-Disposition: form-data; name="type"\r\n\r\nNutricionista\r\n`;
+        payload += `--${boundary}\r\n`;
+        payload += `Content-Disposition: form-data; name="document"; filename="test_doc.pdf"\r\n`;
+        payload += `Content-Type: application/pdf\r\n\r\n`;
+        payload += `Fake PDF content\r\n`;
+        payload += `--${boundary}--\r\n`;
+
+        res = await request('POST', '/api/professionals', payload, token, true, boundary);
         console.log(`Status: ${res.status}`);
         console.log(`Response: ${JSON.stringify(res.data)}\n`);
 
