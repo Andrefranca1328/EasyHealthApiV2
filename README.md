@@ -2,29 +2,96 @@
 
 > *"Evolua quem evolui os outros."*
 
-API RESTful completa que serve como backend para a plataforma **EasyHealth**, conectando **Personal Trainers** e **Nutricionistas** com seus clientes. Desenvolvido para o **Projeto Interdisciplinar IV** do Curso Superior de Tecnologia em **Desenvolvimento de Software Multiplataforma (FATEC Cotia)**.
+API RESTful completa que serve como backend para a plataforma **EasyHealth**, conectando **Personal Trainers** e **Nutricionistas** com seus clientes. Desenvolvido para o **Projeto Interdisciplinar IV** do Curso Superior de Tecnologia em **Desenvolvimento de Software Multiplataforma — FATEC Cotia**.
 
 ---
 
 ## 👥 Integrantes do Grupo (Colaboradores)
-*   **André L. D. França**
-*   **Daniel França**
-*   **Gustavo [Sobrenome]**
-*   **Giancarlo Sabatini**
+
+| Nome | RA |
+|------|----|
+| André L. D. França | [RA] |
+| Daniel França | [RA] |
+| Gustavo [Sobrenome] | [RA] |
+| Giancarlo Sabatini | [RA] |
 
 ---
 
 ## 🌐 URLs Públicas da Aplicação
-*   **URL do Frontend (Produção - Vercel):** [https://easy-health-one.vercel.app/](https://easy-health-one.vercel.app/)
-*   **URL da API de Backend (Produção - Render):** [https://easyhealthapiv2.onrender.com](https://easyhealthapiv2.onrender.com)
-*   **Documentação Interativa (Swagger):** [https://easyhealthapiv2.onrender.com/api/docs](https://easyhealthapiv2.onrender.com/api/docs)
+
+| Ambiente | URL |
+|----------|-----|
+| **Frontend — Produção (Vercel)** | [https://easy-health-one.vercel.app/](https://easy-health-one.vercel.app/) |
+| **Backend — API (Render)** | [https://easyhealthapiv2.onrender.com](https://easyhealthapiv2.onrender.com) |
+| **Documentação Interativa (Swagger)** | [https://easyhealthapiv2.onrender.com/api/docs](https://easyhealthapiv2.onrender.com/api/docs) |
+
+---
+
+## 📚 Documentação do Projeto
+
+### Sobre o Sistema
+
+O **EasyHealth** é uma plataforma de saúde e fitness com dois perfis de usuário:
+
+- **Pacientes/Clientes (`role: user`)** — buscam profissionais por cidade/especialidade, agendam consultas e avaliam profissionais.
+- **Profissionais de Saúde (`role: trainer | nutritionist`)** — gerenciam perfil, confirmam agendamentos, criam planos de treino e acompanham métricas de visitação.
+- **Administradores (`role: admin`)** — aprovam/reprovam cadastros de profissionais e gerenciam roles.
+
+### Arquitetura da API
+
+```
+Cliente HTTP (React/Postman)
+        │
+        ▼
+ Express Router ── authMiddleware (JWT) ── adminMiddleware (role)
+        │
+        ▼
+   Controller ── Service (regras de negócio)
+        │
+        ▼
+  Mongoose ODM ── MongoDB Atlas
+```
+
+### Funcionalidades da API
+
+| # | Módulo | Descrição |
+|---|--------|-----------|
+| 1 | Autenticação JWT | Registro, login com Bcrypt + JWT (1h de expiração) |
+| 2 | Profissionais | Cadastro, busca com filtros dinâmicos, aprovação admin |
+| 3 | Busca Avançada | `/search` com filtros de cidade, modalidade, preço e nota |
+| 4 | Filtros Dinâmicos | `/filters` retorna listas de cidades e modalidades do banco de dados |
+| 5 | Ranking Bayesiano | Ordenação ponderada por relevância estatística |
+| 6 | Consultas | Agendamento, confirmação, cancelamento com multa de 30% (<24h) |
+| 7 | Restrição Temporal | Bloqueio de reagendamentos com < 24h de antecedência |
+| 8 | Planos de Treino | CRUD de planos de exercícios por profissional |
+| 9 | Avaliações | Sistema de estrelas (1–5), 1 avaliação por par usuário/profissional |
+| 10 | Métricas de Perfil | Log de visualizações (ProfileViewLog) com janela de 7 dias |
+| 11 | Painel Admin | Aprovação/reprovação de profissionais e gestão de roles |
+| 12 | Documentação Swagger | Interface interativa em `/api/docs` |
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+| Tecnologia | Versão | Finalidade |
+|-----------|--------|-----------|
+| Node.js | 20.x | Runtime JavaScript no servidor |
+| Express | 5.x | Framework HTTP |
+| MongoDB Atlas | — | Banco de dados NoSQL em nuvem |
+| Mongoose | 9.x | ODM para modelagem de dados |
+| JWT (jsonwebtoken) | 9.x | Autenticação e autorização stateless |
+| Bcrypt | 6.x | Hash seguro de senhas |
+| Joi | 17.x | Validação de entrada em todos os endpoints |
+| Multer | 2.x | Upload de arquivos (documentos PDF) |
+| Swagger UI Express | 5.x | Documentação interativa da API |
+| Jest | 29.x | Testes unitários (47 testes, 100% aprovados) |
+| Nodemon | 3.x | Hot reload no ambiente de desenvolvimento |
+| GitHub Actions | — | Pipeline de CI/CD automatizado |
 
 ---
 
 ## 📋 Índice
 
-- [Funcionalidades](#funcionalidades)
-- [Stack](#stack)
 - [Pré-requisitos](#pré-requisitos)
 - [Instalação](#instalação)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
@@ -33,40 +100,7 @@ API RESTful completa que serve como backend para a plataforma **EasyHealth**, co
 - [Testes](#testes)
 - [Endpoints](#endpoints)
 - [Deploy](#deploy)
-
----
-
-## ✅ Funcionalidades
-
-- **Autenticação JWT** — registro, login e proteção de rotas
-- **Roles:** `user` (cliente), `trainer`, `nutritionist`, `admin`
-- **Profissionais** — cadastro com upload de documento PDF, aprovação por admin
-- **Listagem de Profissionais** — filtros por tipo, cidade e nota mínima
-- **Ranking Bayesiano** — profissionais ordenados por nota ponderada
-- **Planos de Treino** (Personal Trainer) e **Planos Alimentares** (Nutricionista)
-- **Avaliações** — clientes avaliam profissionais (1–5 estrelas); 1 avaliação por par
-- **Métricas de Perfil** — contador de visualizações dos últimos 7 dias
-- **Painel Admin** — aprovação/reprovação de profissionais, gestão de roles
-- **Documentação Swagger** em `/api/docs`
-- **Validação de entrada** com Joi em todos os endpoints
-- **Rate limiting** no login (20 req / 15 min)
-
----
-
-## 🛠️ Stack
-
-| Tecnologia | Versão | Uso |
-|-----------|--------|-----|
-| Node.js | 20 | Runtime |
-| Express | 5.x | Framework HTTP |
-| MongoDB | Atlas | Banco de dados |
-| Mongoose | 9.x | ODM |
-| JWT | 9.x | Autenticação |
-| Bcrypt | 6.x | Hash de senhas |
-| Joi | 17.x | Validação de entrada |
-| Multer | 2.x | Upload de arquivos |
-| Swagger UI | 5.x | Documentação interativa |
-| Jest | 29.x | Testes unitários |
+- [Controle de Versão](#controle-de-versão)
 
 ---
 
@@ -100,7 +134,7 @@ cp .env.example .env
 Crie um arquivo `.env` na raiz com base no `.env.example`:
 
 | Variável | Obrigatório | Descrição | Exemplo |
-|----------|:-----------:|-----------|---------|
+|----------|:-----------:|-----------|---------| 
 | `MONGO_URI` | ✅ | String de conexão MongoDB Atlas | `mongodb+srv://...` |
 | `JWT_SECRET` | ✅ | Chave secreta JWT (mín. 32 chars) | `super_secret_key` |
 | `JWT_EXPIRES_IN` | ❌ | Expiração do token | `1h` |
@@ -125,20 +159,18 @@ npm run dev
 npm start
 ```
 
-A API estará disponível em `http://localhost:3000`  
+A API estará disponível em `http://localhost:3000`
 Documentação Swagger: `http://localhost:3000/api/docs`
 
 ---
 
 ## 👤 Criar Admin
 
-O primeiro usuário administrador é criado via script. Configure `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `ADMIN_NAME` no `.env` e execute:
-
 ```bash
 npm run seed:admin
 ```
 
-Após isso, faça login com essas credenciais e use o token obtido nas rotas `/api/admin/*`.
+Configure `ADMIN_EMAIL`, `ADMIN_PASSWORD` e `ADMIN_NAME` no `.env` antes de executar.
 
 ---
 
@@ -152,7 +184,17 @@ npm test
 npm test -- --verbose
 ```
 
-**Cobertura:** Services e middlewares — meta ≥ 80%
+**Status atual:** 47 testes unitários — **100% aprovados** ✅
+
+**Cobertura:** Services e middlewares críticos — meta ≥ 80%
+
+Suítes de teste:
+- `tests/auth.unit.test.js` — Autenticação e registro
+- `tests/professional.unit.test.js` — Serviços de profissionais
+- `tests/rating.unit.test.js` — Sistema de avaliações
+- `tests/training.unit.test.js` — Planos de treino
+- `tests/user.unit.test.js` — Gestão de usuários
+- `tests/middleware.unit.test.js` — Middlewares de segurança
 
 ---
 
@@ -162,7 +204,7 @@ npm test -- --verbose
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| POST | `/register` | Cadastro de usuário |
+| POST | `/register` | Cadastro de usuário (paciente ou profissional) |
 | POST | `/login` | Login → retorna JWT |
 
 ### 👤 Usuários — `/api/users` (requer JWT)
@@ -180,20 +222,31 @@ npm test -- --verbose
 |--------|------|-----------|
 | GET | `/` | Lista aprovados (`?type=&city=&minRating=`) |
 | POST | `/` | Cadastra profissional (multipart/form-data + PDF) |
+| GET | `/search` | Busca com filtros avançados (cidade, modalidade, preço, nota) |
+| GET | `/filters` | Retorna listas dinâmicas de cidades e modalidades |
+| GET | `/top-rated` | Top profissionais por nota bayesiana (`?limit=10`) |
 | GET | `/:id` | Perfil completo |
 | PUT | `/:id` | Atualiza perfil |
 | DELETE | `/:id` | Remove |
-| GET | `/top-rated` | Top profissionais por nota (`?limit=10`) |
-| GET | `/type/:type` | Filtra por tipo |
-| GET | `/:id/profile-views` | Incrementa e retorna views |
+| GET | `/:id/profile-views` | Incrementa e retorna views dos últimos 7 dias |
+
+### 📅 Consultas — `/api/consultas` (requer JWT)
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| POST | `/` | Cria agendamento de consulta |
+| GET | `/professional/:professionalId` | Consultas do profissional |
+| GET | `/user/:userId` | Consultas do paciente |
+| PATCH | `/:id/cancel` | Cancelamento (aplica multa 30% se < 24h) |
+| PATCH | `/:id/confirm` | Confirmação de consulta pelo profissional |
 
 ### 📋 Planos — `/api/plans` (requer JWT)
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
 | POST | `/` | Cria plano (treino ou alimentar) |
-| GET | `/my` | Planos do cliente logado (`?type=training\|meal`) |
-| GET | `/created` | Planos criados por um profissional |
+| GET | `/my` | Planos do cliente logado |
+| GET | `/created` | Planos criados por profissional |
 | GET | `/:id` | Detalhe do plano |
 | PUT | `/:id` | Atualiza plano |
 | DELETE | `/:id` | Remove plano |
@@ -244,6 +297,20 @@ docker run -p 3000:3000 --env-file .env easyhealth-api
 
 ---
 
+## 🔄 Controle de Versão (Semantic Release)
+
+O repositório segue a convenção de commits semânticos:
+
+| Prefixo | Tipo |
+|---------|------|
+| `feat:` | Nova funcionalidade |
+| `fix:` | Correção de bug |
+| `chore:` | Manutenção geral |
+| `docs:` | Atualização de documentação |
+| `refactor:` | Refatoração sem mudança de comportamento |
+
+---
+
 ## 📄 Licença
 
-MIT © EasyHealth Team
+MIT © EasyHealth Team — FATEC Cotia 2025
