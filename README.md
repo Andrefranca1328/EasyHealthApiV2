@@ -2,13 +2,22 @@
 
 > *"Evolua quem evolui os outros."*
 
-Plataforma REST API que conecta **Personal Trainers** e **Nutricionistas** com seus clientes. Profissionais cadastram seus perfis e planos; clientes encontram, avaliam e acompanham seus profissionais.
+API RESTful completa que serve como backend para a plataforma **EasyHealth**, conectando **Personal Trainers** e **Nutricionistas** com seus clientes. Desenvolvido para o **Projeto Interdisciplinar IV** do Curso Superior de Tecnologia em **Desenvolvimento de Software Multiplataforma (FATEC Cotia)**.
 
-![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=flat-square&logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express-5.x-000000?style=flat-square&logo=express)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose_9-47A248?style=flat-square&logo=mongodb&logoColor=white)
-![Jest](https://img.shields.io/badge/Testes-Jest-C21325?style=flat-square&logo=jest)
-![Swagger](https://img.shields.io/badge/Docs-Swagger-85EA2D?style=flat-square&logo=swagger&logoColor=black)
+---
+
+## 👥 Integrantes do Grupo (Colaboradores)
+*   **André L. D. França**
+*   **Daniel França**
+*   **Gustavo [Sobrenome]**
+*   **Giancarlo Sabatini**
+
+---
+
+## 🌐 URLs Públicas da Aplicação
+*   **URL do Frontend (Produção - Vercel):** [https://easy-health-one.vercel.app/](https://easy-health-one.vercel.app/)
+*   **URL da API de Backend (Produção - Render):** [https://easyhealthapiv2.onrender.com](https://easyhealthapiv2.onrender.com)
+*   **Documentação Interativa (Swagger):** [https://easyhealthapiv2.onrender.com/api/docs](https://easyhealthapiv2.onrender.com/api/docs)
 
 ---
 

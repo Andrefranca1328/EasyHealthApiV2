@@ -10,6 +10,7 @@ const create = Joi.object({
         'any.required': 'Tipo é obrigatório.'
     }),
     professionalRegister: Joi.string().max(30).optional(),
+    document:             Joi.string().max(500).optional(),
     bio:                  Joi.string().max(800).optional(),
     city:                 Joi.string().max(100).optional(),
     state:                Joi.string().length(2).uppercase().optional(),

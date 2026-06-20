@@ -12,6 +12,8 @@ router.use(authMiddleware);
 
 // Listagem pública (autenticada) de profissionais aprovados — com filtros opcionais
 router.get('/',                   ProfessionalController.getAllProfessionals);
+router.get('/search',             ProfessionalController.searchProfessionals);
+router.get('/filters',            ProfessionalController.getFilterOptions);
 router.get('/top-rated',          ProfessionalController.getTopRatedProfessionals);
 router.get('/type/:type',         ProfessionalController.getProfessionalsByType);
 router.get('/:id/profile-views',  ProfessionalController.getProfileViewsLast7Days);

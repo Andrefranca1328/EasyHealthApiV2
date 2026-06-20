@@ -57,6 +57,36 @@ const ConsultaController = {
         }
     },
 
+    getConsultasByProfissional: async (req, res) => {
+        try {
+            const professionalId = req.params.professionalId;
+            const consultas = await Consulta.find({ professionalId })
+                .populate('userId', 'name email phone')
+                .sort({ data: 1, horario: 1 }); // Ordenar por data e horário mais próximos
+
+            // Formata o retorno para o padrão esperado pelo frontend
+            const formatadas = consultas.map(c => {
+                const [ano, mes, dia] = c.data.split('-');
+                const dataFormatada = dia ? `${dia}/${mes}/${ano}` : c.data;
+
+                return {
+                    _id: c._id,
+                    especialidade: c.especialidade,
+                    paciente: c.userId?.name || 'Paciente',
+                    pacienteEmail: c.userId?.email || '',
+                    pacienteTelefone: c.userId?.phone || '',
+                    status: c.status,
+                    data: dataFormatada,
+                    horario: c.horario
+                };
+            });
+
+            res.status(200).json(formatadas);
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    },
+
     cancelConsulta: async (req, res) => {
         try {
             const consultaId = req.params.id;
@@ -67,7 +97,10 @@ const ConsultaController = {
                 return res.status(404).json({ error: 'Consulta não encontrada.' });
             }
 
-            if (consulta.userId.toString() !== userId) {
+            const isPatient = consulta.userId.toString() === userId;
+            const isProfessional = consulta.professionalId?.userId?.toString() === userId;
+
+            if (!isPatient && !isProfessional) {
                 return res.status(403).json({ error: 'Não autorizado.' });
             }
 
@@ -83,10 +116,13 @@ const ConsultaController = {
             let multa = 0;
             let mensagem = 'Consulta cancelada com sucesso sem custo adicional.';
 
-            if (diffHours < 24) {
+            // A multa de 30% só é aplicada ao paciente se ele cancelar em menos de 24h
+            if (isPatient && diffHours < 24) {
                 const valorSessao = consulta.professionalId?.pricePerHour || 0;
                 multa = valorSessao * 0.30;
                 mensagem = `Consulta cancelada com sucesso. Foi aplicada uma multa de 30% (R$ ${multa.toFixed(2).replace('.', ',')}) devido à antecedência inferior a 24 horas.`;
+            } else if (isProfessional && diffHours < 24) {
+                mensagem = 'Consulta cancelada pelo profissional da saúde.';
             }
 
             consulta.status = 'Cancelada';
@@ -109,12 +145,15 @@ const ConsultaController = {
                 return res.status(400).json({ error: 'Data e horário são obrigatórios.' });
             }
 
-            const consulta = await Consulta.findById(consultaId);
+            const consulta = await Consulta.findById(consultaId).populate('professionalId');
             if (!consulta) {
                 return res.status(404).json({ error: 'Consulta não encontrada.' });
             }
 
-            if (consulta.userId.toString() !== userId) {
+            const isPatient = consulta.userId.toString() === userId;
+            const isProfessional = consulta.professionalId?.userId?.toString() === userId;
+
+            if (!isPatient && !isProfessional) {
                 return res.status(403).json({ error: 'Não autorizado.' });
             }
 
@@ -144,6 +183,34 @@ const ConsultaController = {
             await consulta.save();
 
             res.status(200).json({ message: 'Consulta reagendada com sucesso.', consulta });
+        } catch (error) {
+            res.status(400).json({ error: error.message });
+        }
+    },
+
+    confirmConsulta: async (req, res) => {
+        try {
+            const consultaId = req.params.id;
+            const userId = req.user.id;
+
+            const consulta = await Consulta.findById(consultaId).populate('professionalId');
+            if (!consulta) {
+                return res.status(404).json({ error: 'Consulta não encontrada.' });
+            }
+
+            const isProfessional = consulta.professionalId?.userId?.toString() === userId;
+            if (!isProfessional) {
+                return res.status(403).json({ error: 'Não autorizado. Apenas o profissional pode confirmar a consulta.' });
+            }
+
+            if (consulta.status !== 'Pendente') {
+                return res.status(400).json({ error: 'Apenas consultas pendentes podem ser confirmadas.' });
+            }
+
+            consulta.status = 'Confirmada';
+            await consulta.save();
+
+            res.status(200).json({ message: 'Consulta confirmada com sucesso.', consulta });
         } catch (error) {
             res.status(400).json({ error: error.message });
         }

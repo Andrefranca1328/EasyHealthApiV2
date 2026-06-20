@@ -11,7 +11,15 @@ const ProfessionalController = {
      */
     createProfessional: async (req, res, next) => {
         try {
-            const documentPath = storageService.getFilePath(req.file);
+            let documentPath = '';
+            if (req.file) {
+                documentPath = storageService.getFilePath(req.file);
+            } else if (req.body.document) {
+                documentPath = req.body.document;
+            } else {
+                return res.status(400).json({ error: 'Nenhum arquivo ou documento comprobatório recebido.' });
+            }
+
             const professional = await ProfessionalService.createProfessional({
                 ...req.body,
                 document: documentPath
@@ -32,6 +40,34 @@ const ProfessionalController = {
             const { type, city, minRating } = req.query;
             const professionals = await ProfessionalService.getAllApproved({ type, city, minRating });
             res.status(200).json(professionals);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    searchProfessionals: async (req, res, next) => {
+        try {
+            const { page, limit, city, modality, minPrice, maxPrice, minRating, sortBy } = req.query;
+            const result = await ProfessionalService.searchApproved({
+                page,
+                limit,
+                city,
+                modality,
+                minPrice,
+                maxPrice,
+                minRating,
+                sortBy
+            });
+            res.status(200).json(result);
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getFilterOptions: async (req, res, next) => {
+        try {
+            const options = await ProfessionalService.getFilterOptions();
+            res.status(200).json(options);
         } catch (error) {
             next(error);
         }
