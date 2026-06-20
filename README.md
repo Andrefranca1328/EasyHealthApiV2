@@ -77,8 +77,8 @@ Cliente HTTP (React/Postman)
 |-----------|--------|-----------|
 | Node.js | 20.x | Runtime JavaScript no servidor |
 | Express | 5.x | Framework HTTP |
-| MongoDB Atlas | — | Banco de dados NoSQL em nuvem |
-| Mongoose | 9.x | ODM para modelagem de dados |
+| **MongoDB Atlas** | — | **Banco de dados NoSQL em nuvem** |
+| **Mongoose** | 9.x | **ODM para modelagem e validação de schemas** |
 | JWT (jsonwebtoken) | 9.x | Autenticação e autorização stateless |
 | Bcrypt | 6.x | Hash seguro de senhas |
 | Joi | 17.x | Validação de entrada em todos os endpoints |
@@ -87,6 +87,49 @@ Cliente HTTP (React/Postman)
 | Jest | 29.x | Testes unitários (47 testes, 100% aprovados) |
 | Nodemon | 3.x | Hot reload no ambiente de desenvolvimento |
 | GitHub Actions | — | Pipeline de CI/CD automatizado |
+
+---
+
+## 🗄️ Banco de Dados — MongoDB Atlas
+
+O EasyHealth utiliza **[MongoDB Atlas](https://www.mongodb.com/cloud/atlas)** — SGBD **NoSQL orientado a documentos**, hospedado em nuvem com alta disponibilidade e backup automático.
+
+### Por que MongoDB?
+
+- **Schema flexível:** dados heterogêneos (logs, planos personalizados, metadados) sem migrações forçadas
+- **Escalabilidade horizontal** nativa via sharding
+- **Integração via Mongoose ODM:** validações embutidas no schema, índices compostos e population de referências
+- **Hosted no Atlas:** zero configuração de infraestrutura, conexão via `MONGO_URI` na variável de ambiente
+
+### Coleções e Schemas
+
+| Coleção | Campos Principais | Relações |
+|---------|-------------------|----------|
+| `users` | `name`, `email` (único), `password` (Bcrypt), `cpf` (único), `city`, `state`, `role` | — |
+| `professionals` | `userId`, `type`, `city`, `state`, `pricePerHour`, `status`, `averageRating`, `weighted_rating` | → `users` |
+| `consultas` | `userId`, `professionalId`, `date`, `time`, `status`, `multaAplicada` | → `users`, `professionals` |
+| `trainings` | `userId`, `professionalId`, `description`, `exercises[]` | → `users`, `professionals` |
+| `ratings` | `userId`, `professionalId`, `rating` (1–5) | → ambos (índice único composto) |
+| `profileviewlogs` | `professionalId`, `viewed_at` | → `professionals` |
+
+### Índices relevantes
+
+```js
+// Prevenção de avaliação duplicada (Rating)
+RatingSchema.index({ userId: 1, professionalId: 1 }, { unique: true });
+
+// Busca rápida de profissionais por cidade e tipo
+ProfessionalSchema.index({ city: 1, type: 1, status: 1 });
+
+// Lookup eficiente de logs de visita por janela de tempo
+ProfileViewLogSchema.index({ professionalId: 1, viewed_at: -1 });
+```
+
+### String de Conexão (variável de ambiente)
+
+```env
+MONGO_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/easyhealth?retryWrites=true&w=majority
+```
 
 ---
 
